@@ -1,0 +1,12 @@
+__pycache__/
+*.py[cod]
+.jieba_cache/
+.idea/
+/outputs/*
+/checkpoints/*
+!/checkpoints/.gitkeep
+*.log
+
+# Large model artifacts are obtained from the links in README.md.
+assets/ltp/*.model
+bert_geo/pytorch_model.bin

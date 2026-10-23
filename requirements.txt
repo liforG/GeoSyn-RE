@@ -1,0 +1,9 @@
+numpy==1.19.5
+torch==1.10.2
+transformers==4.18.0
+fastNLP==0.6.0
+tqdm==4.64.1
+pandas==1.1.5
+openpyxl==3.0.10
+jieba==0.42.1
+requests==2.27.1
