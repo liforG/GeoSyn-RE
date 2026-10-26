@@ -132,10 +132,6 @@ def _extract_infix_overlap(row, base, type_schema):
             ))
             continue
         left, right = left_values[0], right_values[0]
-        # ``夹`` describes material intercalation.  A generic stratigraphic
-        # unit immediately before it is often the container of a later rock
-        # phrase rather than the left material itself.  Keep SM only when its
-        # surface name explicitly denotes a lithologic rock group.
         if left.get("type") == "SM" and not left.get("text", "").endswith("岩组"):
             rejected.append(v22._rejection(
                 lexeme, trigger_id, "explicit_infix_overlap",

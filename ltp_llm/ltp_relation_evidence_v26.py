@@ -25,8 +25,6 @@ except (ImportError, ValueError):
 PARENT_CHILD_RELATIONS = {"PO", "A", "BW", "C", "E", "W", "S", "N", "NE", "SE", "NW", "SW"}
 V26_POSITIONAL_LOCALIZERS = dict(v24.POSITIONAL_LOCALIZERS)
 V26_POSITIONAL_LOCALIZERS.update({
-    # The original lexicon had 下段/下亚段 but omitted their upper and central
-    # counterparts.  These are direct, symmetric stratigraphic localizers.
     "上段": "A",
     "上亚段": "A",
     "中亚段": "C",
@@ -111,10 +109,6 @@ def _pair_hierarchy_link(tokens, left, right, heads,
     if left_head is None or right_head is None:
         return None
     if clause_ids[int(left_head) - 1] != clause_ids[int(right_head) - 1]:
-        # A leading ``在地点，地层...`` phrase is an explicit location
-        # scope even though punctuation gives it a separate clause id.  Do
-        # not generalise this to ``沿/附近/以北``: those are independently
-        # annotated directional or discourse modifiers in GNRED.
         trigger_id = _entity_start(left) - 1
         if (
             left.get("type") == "TM" and trigger_id >= 1
@@ -209,11 +203,6 @@ def _build_carrier_hierarchy(tokens, entities, carrier, child_item,
     if not links:
         return carrier, [], False
 
-    # Pure containment associates outside an occurrence/positional parent:
-    # ``X中的Y可见Z`` is IN(X, IN(Y, Z)), not IN(IN(X, Y), Z).
-    # A positional link is different: ``X的Y顶部Z见R`` requires the complete
-    # A(IN(X, Y), Z) carrier before IN can attach R.  Copular EQ likewise
-    # consumes the complete explicit carrier chain.
     if (
         parent_relation != "EQ"
         and not any(link[0] in {"A", "BW", "C"} for link in links)
@@ -260,7 +249,6 @@ def _classify_parent(tokens, carrier, child_item):
         token_id, lexeme, relation = positional[0]
         return relation, lexeme, token_id, "explicit_child_positional_parent"
 
-    # ``X岩性以 child 为特征`` is an identity/lithology statement in GNRED.
     if (
         LITHOLOGY_MARKER in between and "以" in between
         and FEATURE_MARKER in tail and COPULAR_MARKER in tail
@@ -270,9 +258,6 @@ def _classify_parent(tokens, carrier, child_item):
         )
         return "EQ", lexeme, token_id, "explicit_lithology_feature_parent"
 
-    # A direct copular statement maps to EQ.  ``岩性为`` is deliberately
-    # excluded because GNRED consistently treats that construction as IN in
-    # this corpus; ``为以...为特征`` is also not a direct copular statement.
     if (
         COPULAR_MARKER in between and LITHOLOGY_MARKER not in between
         and "以" not in between

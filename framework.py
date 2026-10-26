@@ -39,7 +39,7 @@ class FrameWorkTrans(object):
         print("模型目录（传入的）:", config.model_dir)
         self.data_dir = config.data_dir
         self.all_type, self.relations = get_type_info(config.type_file)
-        self.model = ITransformer(config.bert_dir, config.max_sent_len, config.bert_hidden,  # 初始化模型
+        self.model = ITransformer(config.bert_dir, config.max_sent_len, config.bert_hidden,  # Initialize the model.
                                   config.bert_head, config.transformer_layer,
                                   self.all_type, config.trans_type,
                                   runtime_config=config).to(config.device)
@@ -116,7 +116,7 @@ class FrameWorkTrans(object):
     def train(self, train_file=None):
         train_iter = get_data_loader2(
             self.config.train_prefix, self.data_dir, batch_size=self.config.batch_size,
-            tokenizer=self.tokenizer, max_seq_len=self.config.max_sent_len, data_file=train_file)  # 将文本数据转换为模型可以处理的格式
+            tokenizer=self.tokenizer, max_seq_len=self.config.max_sent_len, data_file=train_file)  # Convert text data to the model input format.
 
         batch_len = len(train_iter)
         self._setup_train()
@@ -193,7 +193,7 @@ class FrameWorkTrans(object):
                 # pllm_batch = [self.pllm_scores.get(str(sid), {}) for sid in batch.get('sid', [])]
                 predict = self.model.predict_scratch(
                     x=sentence, x_mask=mask, entity_index=entity_index,entity_type=entity_type,
-                    relations=self.relations, threshold=threshold,  # 这里继续用你原来的 threshold，不要动态阈值
+                    relations=self.relations, threshold=threshold,  # Keep the configured threshold; do not use a dynamic threshold.
                     max_layer=getattr(self.config, "max_relation_layer", 6),
                     # pllm_scores=pllm_batch,alpha=getattr(self.config, "fusion_alpha", 0.7),
                 )
@@ -218,12 +218,12 @@ class FrameWorkTrans(object):
             all_examples = []
             for batch in valid_iter:
                 for sid, entity, element in zip(batch['sid'], batch['entity'], batch['element']):
-                    all_examples.append({'sid': sid, 'entity': entity, 'element': element})  # 存储提取的示例数据 也就是数据集中的
+                    all_examples.append({'sid': sid, 'entity': entity, 'element': element})  # Store the extracted examples from the dataset.
             print(
                 f"------------------------------predict on test dataset and save to {self.model_dir}/predict.json----------------------------------------")
             print("保存文件的完整路径：", os.path.join(self.model_dir, 'predict.json'))
             save_predict(all_predict, all_examples, os.path.join(self.model_dir, 'predict.json'))
-            analysis_relation_distribution(all_elem, all_entity, [r[0] for r in self.relations],  # 关系分布的表格  并不是预测是表格
+            analysis_relation_distribution(all_elem, all_entity, [r[0] for r in self.relations],  # Build the relation-distribution table, not a prediction table.
                                            out_file=os.path.join(self.model_dir, 'labeled_analysis.csv'))
             analysis_relation_distribution([e + p for e, p in zip(all_entity, all_predict)], all_entity,
                                            [r[0] for r in self.relations],

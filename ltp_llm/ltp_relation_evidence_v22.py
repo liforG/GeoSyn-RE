@@ -486,9 +486,6 @@ def _extract_nested_overlap(row, type_schema, entities, heads, dependency_relati
 
         outer_evidence = None
         if for_values:
-            # The LTP parser normally attaches the whole phrase either as an
-            # entity SBV of ``夹`` or as a localizer SBV whose ATT child is the
-            # whole entity.
             if len(direct_subjects) == 1:
                 rejected.append(_rejection(
                     "为…夹", trigger_id, "nested_overlap",
@@ -634,8 +631,6 @@ def _extract_localizers(row, type_schema, entities, heads, dependency_relations,
             targets = _direct_entities(children, entities_by_head, predicate_id, {"SBV"})
             target_role = "SBV"
         else:
-            # ADV localizers such as "附近" frequently modify an evidential
-            # verb ("露头显示") rather than directly relating two entities.
             targets = []
             target_role = None
 

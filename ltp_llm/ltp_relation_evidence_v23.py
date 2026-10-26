@@ -283,11 +283,6 @@ def _explicit_localizer_between(tokens, left_entity, right_entity, heads,
     if len(candidates) == 1:
         return candidates[0]
 
-    # LTP may split a lexicon entry such as ``下段`` into ``下`` + ``段``.
-    # Accept the split form only when the complete text between the two
-    # entities is itself an approved localizer and every participating token
-    # is dependency-attached to the right entity.  This is not a new lexical
-    # rule and does not use a token-window fallback.
     intervening_ids = list(range(left_end + 1, right_start))
     if len(intervening_ids) >= 2:
         compound = "".join(tokens[token_id - 1] for token_id in intervening_ids)

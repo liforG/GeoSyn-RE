@@ -66,9 +66,6 @@ def _anchor_entities(entities, localizer_id, clause_ids, heads,
     result = v23._unique_by_entity_id(result)
     if not result:
         return result, paths
-    # In chains such as ``泥盆系内上伦组中部``, both ancestors can reach the
-    # localizer through ATT, but the nearest entity is the actual positional
-    # anchor.  Preserve ambiguity only when multiple anchors are equally near.
     shortest = min(len(paths[item["entity_id"]]) for item in result)
     nearest = [
         item for item in result
@@ -370,11 +367,6 @@ def _extract_carrier_wrappers(row, base, type_schema):
                 nominal_paths[nominal[0]["entity_id"]],
             ))
 
-        # A same-clause carrier is always the inner layer.  A localizer from
-        # the immediately preceding phrase is considered only when the
-        # predicate has no same-clause carrier at all (for example
-        # ``X剖面中，Y中段为Z``).  This prevents an outer ``过渡带内`` from
-        # competing with the inner ``湖区中``.
         if not carrier_options and len(cross_clause_localizers) == 1:
             carrier_options.extend(cross_clause_localizers)
 

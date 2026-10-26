@@ -5,7 +5,7 @@ import os
 import unicodedata
 
 
-# ===================== sentence 归一化 =====================
+# ===================== Sentence normalization =====================
 def normalize_sentence(text: str) -> str:
     if not isinstance(text, str):
         return ""
@@ -45,7 +45,7 @@ def extract_entity_from_sentence(sentence, index_pair):
     return sentence[s:e + 1]
 
 
-# ===================== 实体查找 =====================
+# ===================== Entity lookup =====================
 def _index_from_entity_id(entity_id, entity, test_entities):
     if entity_id is None:
         return -1
@@ -97,7 +97,7 @@ def find_entity_index(entity, entity_map, test_entities, entity_id=None):
 # ==================================================
 
 
-# ===================== 稳定递归结构 =====================
+# ===================== Stable recursive structure =====================
 def get_triple_subject(node):
     return node.get("subject", node.get("subj"))
 

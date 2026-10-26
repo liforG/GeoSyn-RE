@@ -104,9 +104,6 @@ def _extract_unique_locative_directions(row, base, type_schema):
             and tokens[token_id - 1] in v27.DIRECTION_LOCALIZERS
         )
         if direction_count != 1:
-            # ``位于A东南B北`` contains two separate direction assertions;
-            # it is already handled by the strict V27/V28 path and must not
-            # be reinterpreted as an embedded A-to-B relation.
             continue
         same_clause = [
             entity for entity in entities
@@ -131,21 +128,11 @@ def _extract_unique_locative_directions(row, base, type_schema):
             ],
             key=lambda item: (_entity_start(item), _entity_end(item)),
         )
-        # In ``X位于Y北部Z`` the annotated direction is N(Y, Z).  This is an
-        # operand correction for the same explicit direction family, not a
-        # nearest-window fallback: X and Y must still be the unique locative
-        # subject/reference pair and Z must be the first entity immediately
-        # following the explicit direction phrase.  ``X位于Y北部`` remains
-        # frozen at V28 because its annotation direction is not consistent
-        # enough to satisfy the expansion precision floor.
         if not following_entities:
             continue
         left = reference
         right = following_entities[0]
         pattern = "expanded_embedded_locative_direction"
-        # Recover diagonal words split by LTP at an entity boundary, e.g.
-        # ``龙头山|东|南缘|漠河``.  Character spans preserve the explicit
-        # surface phrase even when the token ``山东`` crosses the boundary.
         sentence = row.get("sentence", "")
         between = sentence[
             int(reference["span"][1]) + 1:int(right["span"][0])

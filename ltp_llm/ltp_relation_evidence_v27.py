@@ -193,15 +193,12 @@ def _extract_positional_entity_links(row, base, type_schema):
                 continue
         relation, lexeme, trigger_id, unused_pattern, path = link
         if lexeme == "之上" and right.get("type") == "RK":
-            # ``X之上的一套岩性`` uses X as the base of an omitted/topic
-            # stratigraphic unit; the following rock is not itself that unit.
             continue
         _accept_entity_relation(
             type_schema, relation, lexeme, trigger_id, left, right,
             "explicit_standalone_positional_link", path, accepted, rejected,
         )
 
-    # ``X接触于Y之上``: GNRED stores A(Y, X), i.e. base before overlying unit.
     for trigger_id, lexeme in enumerate(tokens, 1):
         relation = v26.V26_POSITIONAL_LOCALIZERS.get(lexeme)
         if relation not in {"A", "BW"}:
@@ -258,9 +255,6 @@ def _extract_directional_links(row, base, type_schema):
             continue
         if inside_parentheses(trigger_id):
             continue
-        # LTP may split ``北东侧`` into ``北`` + ``东侧``.  Scoring both parts
-        # creates two wrong cardinal relations; compound directions are
-        # handled only when they remain one explicit token.
         previous = tokens[trigger_id - 2] if trigger_id > 1 else ""
         following = tokens[trigger_id] if trigger_id < len(tokens) else ""
         if (
@@ -280,7 +274,6 @@ def _extract_directional_links(row, base, type_schema):
         right = None
         pattern = None
 
-        # ``subject 位于 reference 东南/北``.
         locative_ids = [
             token_id for token_id in range(1, trigger_id)
             if tokens[token_id - 1] in LOCATIVE_PREDICATES
@@ -310,7 +303,6 @@ def _extract_directional_links(row, base, type_schema):
                 right = references[-1]
                 pattern = "explicit_locative_direction"
 
-        # ``subject 为 anchor 西缘...`` uses anchor-first GNRED order.
         if left is None:
             copular_ids = [
                 token_id for token_id in range(1, trigger_id)
@@ -332,8 +324,6 @@ def _extract_directional_links(row, base, type_schema):
                     right = subjects[0]
                     pattern = "explicit_copular_direction"
 
-        # Plain surface order covers ``X北西翼被Y`` and
-        # ``X分布于Y西南角``.
         if left is None and not locative_ids:
             if len(before) == 1 and len(after) == 1:
                 left, right = before[0], after[0]

@@ -881,7 +881,7 @@ def analysis_relation():
                                           os.path.join(config.data_dir, 'labeled_analysis.csv'))
 
 
-def analysis_relation_distribution(element, entity, relation_types, out_file=None):  # 绘制标签分析，预测分析
+def analysis_relation_distribution(element, entity, relation_types, out_file=None):  # Analyze label and prediction distributions.
     n = len(element)
     dist = [[0] * len(relation_types) for _ in range(10)]
     re2id = {r: i for i, r in enumerate(relation_types)}

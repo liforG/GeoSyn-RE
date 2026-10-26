@@ -74,7 +74,7 @@ def _select_scratch_candidates(
 
 class ITransformer(nn.Module):
     def __init__(self, bert_path, max_seq_len, hidden_size, head, trans_layers, all_types,
-                 trans_type=1, runtime_config=None):  # 实例化时传来的
+                 trans_type=1, runtime_config=None):  # Passed during instantiation.
         super(ITransformer, self).__init__()
         self.encoder = BertModel.from_pretrained(bert_path)
         self.DAG_trans = MyTransformerEncoder(hidden_size, 0.1, head, 4 * hidden_size, trans_layers)
@@ -142,9 +142,9 @@ class ITransformer(nn.Module):
     def forward(self, x, x_mask, entity_index, entity_type, elements, relations, sim_label=None, c_w=0):
         """
         train model iteratively layer by layer
-        :param x: input words ids b x s  x 表示的是输入的单词 ID，形状为 [b, s]，其中： b 是批量大小（batch size）。 s 是序列长度（sequence length） ids代表了句子sentence
-        :param x_mask: input mask b x s
-        :param entity_index: b x ?s x 2, start and end index of all entity in sentences of a batch  实体起始位置
+        :param x: input word IDs, shaped [b, s], where b is the batch size and s is the sequence length.
+        :param x_mask: input mask, shaped [b, s]
+        :param entity_index: b x ?s x 2, containing the start and end indices of all entities in each sentence.
         :param entity_type: b x ?s, entity types in sentences of a batch
         :param elements: b x ?n, element of all sentences in a batch, [(type: str, (op_idx, ...))]
         :param relations: r, contain type and ops types (type: str, (op_type))
@@ -508,7 +508,7 @@ class ITransformer(nn.Module):
         entity_hidden = [
             encoder_output[i][t.tensor(
                 [list(range(entity_index[i][j][0], 1 + entity_index[i][j][1])) + [0] * (
-                        max_ew_len - entity_words_len[i][j])  # 填充0 使得长度相同
+                        max_ew_len - entity_words_len[i][j])  # Pad with zeros to equalize lengths.
                  for j in range(len(entity_index[i]))], dtype=t.long, device=device)] for i in
             range(b)]  # b x ?s x mw x h
 
@@ -544,7 +544,7 @@ class ITransformer(nn.Module):
         result = [[] for _ in range(b)]
 
         while layer <= max_layer:
-            candidates = [generate_candidate2(relations, type2index[i]) for i in range(b)]  # 产生候选对
+            candidates = [generate_candidate2(relations, type2index[i]) for i in range(b)]  # Generate candidate pairs.
             if not has_candidate(candidates):
                 break
             c_lens = [len(c) for c in candidates]
@@ -888,7 +888,7 @@ class ITransformer(nn.Module):
                 for i in range(b)]
             op2_type_ids = [
                 [self.type2id[index2type[i][c[1][1]]] for c in candidates[i]] + [0] * (max_c_len - c_lens[i])
-                for i in range(b)]  # 这里？
+                for i in range(b)]  # Build the padded candidate-type tensor.
             op1_index = [[c[1][0] for c in candidates[i]] + [0] * (max_c_len - c_lens[i]) for i in range(b)]
             op2_index = [[c[1][1] for c in candidates[i]] + [0] * (max_c_len - c_lens[i]) for i in range(b)]
             cls_index = [[self.cls_id] * max_c_len for _ in range(b)]
@@ -943,7 +943,7 @@ class ITransformer(nn.Module):
                     [cls_emb, candidate_type_emb, sep_emb, op1_emb, op1_hid, op1_rad, sep_emb, op2_emb, op2_hid,
                      op2_rad],
                     dim=-1).reshape([b * max_c_len, -1, hs])
-            elif self.trans_type == 2:  # w/o op type   m没有embedding
+            elif self.trans_type == 2:  # Without operand-type embeddings.
                 op1_hid = t.cat([all_elem_hidden[i][t.tensor(op1_index[i], dtype=t.long, device=device)].unsqueeze(0)
                                  for i in range(b)])
                 op2_hid = t.cat([all_elem_hidden[i][t.tensor(op2_index[i], dtype=t.long, device=device)].unsqueeze(0)
